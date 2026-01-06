@@ -2,12 +2,6 @@
     <div class="product-card">
         <a class="overlay" :href="productLink" :title="`Product page for ${productName}`"></a>
 
-        <button @click="toggleCompare" class="compare-btn" :class="{ 'active': isCompared }"
-            :title="isCompared ? 'Remove from compare' : 'Add to compare'">
-            <span v-if="!isCompared">⇅</span>
-            <span v-else>✓</span>
-        </button>
-
         <div class="image-wrap">
             <img v-if="productImage" :src="productImage" :alt="productName || 'Product image'" loading="lazy" />
             <div v-else class="image-fallback">Image</div>
@@ -43,11 +37,6 @@ const props = defineProps({
 })
 
 const emit = defineEmits(['add-to-cart'])
-const isCompared = ref(false)
-
-function toggleCompare() {
-    isCompared.value = !isCompared.value
-}
 
 function onAddToCart() {
     emit('add-to-cart', {
@@ -77,25 +66,6 @@ function onAddToCart() {
     position: absolute;
     inset: 0;
     z-index: 5;
-}
-
-.compare-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    z-index: 20;
-    background: #fff;
-    border: 1px solid #eee;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    cursor: pointer;
-    font-size: 14px;
-}
-
-.compare-btn.active {
-    background: #16a34a;
-    color: #fff;
 }
 
 .image-wrap {

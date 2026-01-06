@@ -22,6 +22,18 @@
           <input v-model="query" type="text" placeholder="Search products" class="input" />
         </div>
         <div class="filter-group">
+          <label>Category</label>
+          <select v-model="selectedCategory" class="input">
+            <option value="">All Categories</option>
+            <option v-for="cat in allCategories" :key="cat" :value="cat">{{ cat }}</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>Price Range: ${{ priceRange[0] }} - ${{ priceRange[1] }}</label>
+          <input type="range" v-model.number="priceRange[0]" min="0" max="1000" step="10" class="range-slider" />
+          <input type="range" v-model.number="priceRange[1]" min="0" max="1000" step="10" class="range-slider" />
+        </div>
+        <div class="filter-group">
           <label><input type="checkbox" v-model="onlyNew" /> Show only New</label>
         </div>
         <div class="filter-group">
@@ -44,8 +56,8 @@
         </div>
       </main>
     </div>
-    <CartPanel v-if="showCart" :cart="cart" @close="showCart = false" @remove="removeFromCart"
-      @change-qty="updateQuantity" />
+    <CartPanel v-model="showCart" :cart="cart" @close="showCart = false" @remove="removeFromCart"
+      @change-qty="updateQuantity" @purchase-complete="completePurchase" />
   </div>
 </template>
 
@@ -53,123 +65,34 @@
 import ProductCard from './components/ProductCard.vue'
 import CartPanel from './components/Cart.vue'
 import { ref, computed } from 'vue'
+import productsData from './assets/products.json'
 
-// Filter state
 const query = ref('')
 const onlyNew = ref(false)
 const sort = ref('default')
+const selectedCategory = ref('')
+const priceRange = ref([0, 1000])
 
-// Cart state
 const cart = ref([])
 const showCart = ref(false)
 
-const products = ref([
-  {
-    id: 1,
-    name: 'hEX lite',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/2064_tm.webp',
-    link: '/product/hex_lite',
-    price: '$39.95',
-    priceValue: 39.95,
-    badge: 'New',
-    features: ['5x Ethernet', 'Small plastic case', 'RouterOS L4'],
-    description: 'Compact 5 port ethernet router, ideal for small setups.'
-  },
-  {
-    id: 2,
-    name: 'hEX',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/2350_tm.webp',
-    link: '/product/hex',
-    price: '$59.95',
-    priceValue: 59.95,
-    badge: null,
-    features: ['5x Gigabit Ethernet', 'RouterOS L4'],
-    description: 'Small form factor router with gigabit ports for home and office.'
-  },
-  {
-    id: 3,
-    name: 'hEX PoE lite',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/2066_tm.webp',
-    link: '/product/hex_poe_lite',
-    price: '$59.95',
-    priceValue: 59.95,
-    badge: null,
-    features: ['PoE output', '5x Ethernet', 'USB'],
-    description: 'Affordable router with PoE output for powering devices.'
-  },
-  {
-    id: 4,
-    name: 'RB5009UG+S+IN',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/2350_tm.webp',
-    link: '/product/rb5009ugs',
-    price: '$349.00',
-    priceValue: 349.0,
-    badge: 'Popular',
-    features: ['10G Ethernet', 'SFP+', 'RouterOS L7'],
-    description: 'Enterprise-grade router with multiple 10G-capable ports.'
-  },
-  {
-    id: 5,
-    name: 'RB4011iGS+RM',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/2466_lg.webp',
-    link: '/product/rb4011',
-    price: '$199.00',
-    priceValue: 199.0,
-    badge: null,
-    features: ['10x Gigabit', '1x SFP+', '64bit CPU'],
-    description: 'Powerful multi-port router for more demanding networks.'
-  },
-  {
-    id: 6,
-    name: 'RB3011UiAS-RM',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/2490_lg.webp',
-    link: '/product/rb3011',
-    price: '$179.00',
-    priceValue: 179.0,
-    badge: null,
-    features: ['10x Gigabit', 'Dual-core CPU', 'USB'],
-    description: 'Balanced performance router with multiple ports and features.'
-  },
-  {
-    id: 7,
-    name: 'CCR1009-7G-1C-1S+',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/883_lg.webp',
-    link: '/product/ccr1009',
-    price: '$649.00',
-    priceValue: 649.0,
-    badge: 'Pro',
-    features: ['7x Gigabit', '1x Combo', '1x SFP+'],
-    description: 'Carrier-class router for demanding enterprise environments.'
-  },
-  {
-    id: 8,
-    name: 'RBcAPGi-5acD2nD',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/845_lg.webp',
-    link: '/product/rbcap',
-    price: '$129.00',
-    priceValue: 129.0,
-    badge: null,
-    features: ['Outdoor', 'Dual-band', 'PoE'],
-    description: 'Robust outdoor unit with dual-band WiFi and PoE support.'
-  },
-  {
-    id: 9,
-    name: 'hEX S',
-    image: 'https://cdn.mikrotik.com/web-assets/rb_images/1282_lg.webp',
-    link: '/product/hex_s',
-    price: '$119.00',
-    priceValue: 119.0,
-    badge: null,
-    features: ['SFP', 'Gigabit ports', 'RouterOS'],
-    description: 'Small router with SFP port for fiber connectivity.'
+const products = ref(productsData)
+
+const allCategories = computed(() => {
+  let cats = new Set()
+  for (let p of products.value) {
+    if (p.category) {
+      cats.add(p.category)
+    }
   }
-])
+  return Array.from(cats).sort()
+})
 
 
 const cartCount = computed(() => {
   let count = 0
-  for (let item of cart.value) {
-    count = count + item.qty
+  for (let i of cart.value) {
+    count = count + i.qty
   }
   return count
 })
@@ -180,7 +103,7 @@ function addToCart(item) {
   let found = false
   for (let i = 0; i < cart.value.length; i++) {
     if (cart.value[i].id === item.id) {
-      cart.value[i].qty += 1
+      cart.value[i].qty = cart.value[i].qty + 1
       found = true
       break
     }
@@ -201,42 +124,52 @@ function addToCart(item) {
 }
 
 function removeFromCart(id) {
-  const index = cart.value.findIndex(item => item.id === id)
-  if (index > -1) {
-    cart.value.splice(index, 1)
+  for (let i = 0; i < cart.value.length; i++) {
+    if (cart.value[i].id === id) {
+      cart.value.splice(i, 1)
+      break
+    }
   }
 }
 
-function updateQuantity({ id, qty }) {
+function updateQuantity(data) {
   for (let item of cart.value) {
-    if (item.id === id) {
-      item.qty = qty
+    if (item.id === data.id) {
+      item.qty = data.qty
       if (item.qty <= 0) {
-        removeFromCart(id)
+        removeFromCart(data.id)
       }
       break
     }
   }
 }
 
+function completePurchase() {
+  cart.value = []
+}
+
 
 
 const filteredProducts = computed(() => {
   let list = []
-  const searchText = query.value.toLowerCase()
+  let search = query.value.toLowerCase()
 
   for (let i = 0; i < products.value.length; i++) {
-    let product = products.value[i]
+    let p = products.value[i]
 
-    if (searchText) {
-      const matchName = product.name.toLowerCase().includes(searchText)
-      const matchDesc = product.description.toLowerCase().includes(searchText)
-      if (!matchName && !matchDesc) continue
+    if (search) {
+      let nameMatch = p.name.toLowerCase().includes(search)
+      let descMatch = p.description.toLowerCase().includes(search)
+      if (!nameMatch && !descMatch) continue
     }
 
-    if (onlyNew.value && product.badge !== 'New') continue
+    if (onlyNew.value && p.badge !== 'New') continue
 
-    list.push(product)
+    if (selectedCategory.value && p.category !== selectedCategory.value) continue
+
+    if (p.priceValue < priceRange.value[0] || p.priceValue > priceRange.value[1]) continue
+
+    list.push(p)
   }
 
   if (sort.value === 'price-asc') {
@@ -366,6 +299,11 @@ body {
   padding: 6px 8px;
   border: 1px solid #ddd;
   border-radius: 6px;
+}
+
+.range-slider {
+  width: 100%;
+  cursor: pointer;
 }
 
 .product-grid {

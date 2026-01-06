@@ -1,116 +1,106 @@
 <template>
-    <div class="cart-overlay">
-        <div class="cart-panel">
-            <header class="cart-header">
-                <h3>Shopping Cart</h3>
-                <button class="close-btn" @click="$emit('close')">Close</button>
-            </header>
-
-            <div v-if="cart && cart.length" class="cart-items">
-                <div v-for="item in cart" :key="item.id" class="cart-item">
-                    <img v-if="item.image" :src="item.image" class="item-thumb" />
-                    <div class="item-body">
-                        <div class="item-name">{{ item.name }}</div>
-                        <div class="item-price">{{ item.price }}</div>
-                        <div class="item-qty">
-                            <button @click="changeQty(item.id, (item.qty || 1) - 1)">-</button>
-                            <input type="number" min="0" :value="item.qty || 1" @input="onQtyInput(item.id, $event)" />
-                            <button @click="changeQty(item.id, (item.qty || 0) + 1)">+</button>
-                        </div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="remove" @click="$emit('remove', item.id)">Remove</button>
+    <Drawer v-model:visible="isVisible" header="Shopping Cart" position="right" @hide="onClose" :modal="true">
+        <div v-if="cart && cart.length" class="cart-items">
+            <div v-for="item in cart" :key="item.id" class="cart-item">
+                <img v-if="item.image" :src="item.image" class="item-thumb" />
+                <div class="item-body">
+                    <div class="item-name">{{ item.name }}</div>
+                    <div class="item-price">{{ item.price }}</div>
+                    <div class="item-qty">
+                        <button @click="changeQty(item.id, (item.qty || 1) - 1)">-</button>
+                        <input type="number" min="0" :value="item.qty || 1" @input="onQtyInput(item.id, $event)" />
+                        <button @click="changeQty(item.id, (item.qty || 0) + 1)">+</button>
                     </div>
                 </div>
+                <div class="item-actions">
+                    <button class="remove" @click="$emit('remove', item.id)">Remove</button>
+                </div>
             </div>
-            <div v-else class="empty">Your cart is empty</div>
+        </div>
+        <div v-else class="empty">Your cart is empty</div>
 
-            <footer class="cart-footer">
+        <template #footer>
+            <div class="cart-footer">
                 <div class="totals">
                     <div>Subtotal</div>
                     <div class="total-value">{{ formattedTotal }}</div>
                 </div>
-            </footer>
-        </div>
-    </div>
+                <button v-if="cart && cart.length" @click="showConfirm = true" class="buy-btn">
+                    Buy Now
+                </button>
+            </div>
+        </template>
+    </Drawer>
+
+    <Dialog v-model:visible="showConfirm" header="Confirm Purchase" :modal="true" :closable="true">
+        <p>Are you sure you want to complete your purchase?</p>
+        <p><strong>Total: {{ formattedTotal }}</strong></p>
+        <template #footer>
+            <button @click="showConfirm = false" class="dialog-cancel-btn">Cancel</button>
+            <button @click="completePurchase" class="dialog-confirm-btn">Confirm Purchase</button>
+        </template>
+    </Dialog>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 const props = defineProps({
-    cart: { type: Array, default: () => [] }
+    cart: { type: Array, default: () => [] },
+    modelValue: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['close', 'remove', 'change-qty'])
+const emit = defineEmits(['close', 'remove', 'change-qty', 'update:modelValue', 'purchase-complete'])
+
+const isVisible = ref(props.modelValue)
+const showConfirm = ref(false)
+
+watch(() => props.modelValue, (newVal) => {
+    isVisible.value = newVal
+})
+
+watch(isVisible, (newVal) => {
+    emit('update:modelValue', newVal)
+})
 
 const total = computed(() => {
     if (!props.cart || props.cart.length === 0) {
         return 0
     }
 
-    let totalPrice = 0
+    let sum = 0
     for (let item of props.cart) {
-        totalPrice = totalPrice + (item.priceValue * item.qty)
+        sum = sum + (item.priceValue * item.qty)
     }
-    return totalPrice
+    return sum
 })
 
 const formattedTotal = computed(() => `$${total.value.toFixed(2)}`)
+
+function onClose() {
+    emit('close')
+}
 
 function changeQty(id, qty) {
     emit('change-qty', { id, qty })
 }
 
 function onQtyInput(id, event) {
-    const qty = Number(event.target.value)
+    let qty = Number(event.target.value)
     changeQty(id, qty)
+}
+
+function completePurchase() {
+    showConfirm.value = false
+    alert('Thank you for your purchase!')
+    emit('purchase-complete')
+    isVisible.value = false
 }
 </script>
 
 <style scoped>
-.cart-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.35);
-    display: flex;
-    justify-content: flex-end;
-    z-index: 60;
-}
-
-.cart-panel {
-    width: 360px;
-    max-width: 100%;
-    background: #fff;
-    height: 100%;
-    padding: 16px;
-    box-shadow: -6px 0 24px rgba(0, 0, 0, 0.12);
-    display: flex;
-    flex-direction: column;
-}
-
-.cart-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.cart-header h3 {
-    margin: 0;
-}
-
-.close-btn {
-    background: transparent;
-    border: 1px solid #ddd;
-    padding: 6px 8px;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
 .cart-items {
-    flex: 1;
-    overflow: auto;
-    margin-top: 12px;
+    margin-bottom: 1rem;
 }
 
 .cart-item {
@@ -199,6 +189,9 @@ function onQtyInput(id, event) {
 .cart-footer {
     border-top: 1px solid #eee;
     padding-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .totals {
@@ -210,5 +203,111 @@ function onQtyInput(id, event) {
 
 .total-value {
     color: #000;
+}
+
+.buy-btn {
+    width: 100%;
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    padding: 10px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.buy-btn:hover {
+    background: #15803d;
+}
+
+.dialog-cancel-btn {
+    background: #e5e7eb;
+    color: #111827;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 8px;
+}
+
+.dialog-confirm-btn {
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+:deep(.p-dialog) {
+    background-color: #fff !important;
+    background: #fff !important;
+    opacity: 1 !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    filter: none !important;
+    mix-blend-mode: normal !important;
+}
+
+:deep(.p-dialog[style]) {
+    background-color: #fff !important;
+    background: #fff !important;
+    opacity: 1 !important;
+}
+
+:deep(.p-dialog.p-component) {
+    background-color: #fff !important;
+    background: #fff !important;
+    opacity: 1 !important;
+}
+
+:deep(.p-dialog .p-dialog-header) {
+    background-color: #fff !important;
+    background: #fff !important;
+    border-bottom: 1px solid #ddd !important;
+    opacity: 1 !important;
+}
+
+:deep(.p-dialog .p-dialog-content) {
+    background-color: #fff !important;
+    background: #fff !important;
+    color: #000 !important;
+    opacity: 1 !important;
+}
+
+:deep(.p-dialog .p-dialog-footer) {
+    background-color: #fff !important;
+    background: #fff !important;
+    border-top: 1px solid #ddd !important;
+    opacity: 1 !important;
+}
+
+:deep(.p-dialog-mask) {
+    background: rgba(0, 0, 0, 0.7) !important;
+}
+
+:deep(.p-component) {
+    background-color: #fff !important;
+    background: #fff !important;
+    opacity: 1 !important;
+}
+
+:deep(.p-dialog p) {
+    color: #000 !important;
+    opacity: 1 !important;
+    background-color: #fff !important;
+    background: #fff !important;
+}
+
+:deep(.p-dialog-content p) {
+    background-color: #fff !important;
+    background: #fff !important;
+    color: #000 !important;
+    opacity: 1 !important;
+}
+
+:deep(.p-dialog-title) {
+    color: #000 !important;
 }
 </style>
