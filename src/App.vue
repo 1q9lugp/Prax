@@ -3,6 +3,7 @@
     <nav class="nav">
       <div class="nav-inner container">
         <ul class="nav-links">
+          <li><button @click="addProduct()">Add Product</button></li>
           <li><a href="#home">Home</a></li>
           <li><a href="#products">Products</a></li>
           <li><a href="#contact">Contact Us</a></li>
@@ -58,12 +59,14 @@
     </div>
     <CartPanel v-model="showCart" :cart="cart" @close="showCart = false" @remove="removeFromCart"
       @change-qty="updateQuantity" @purchase-complete="completePurchase" />
+    <ProductForm @product-added="onProductAdded" />
   </div>
 </template>
 
 <script setup>
 import ProductCard from './components/ProductCard.vue'
 import CartPanel from './components/Cart.vue'
+import ProductForm from './components/ProductForm.vue'
 import { ref, computed } from 'vue'
 import productsData from './assets/products.json'
 
@@ -198,6 +201,55 @@ const filteredProducts = computed(() => {
 
   return list
 })
+
+
+async function fetchProducts() {
+  try {
+    const response = await fetch('http://localhost:3333/produkty')
+    if (response.ok) {
+      const data = await response.json()
+      products.value = data
+    } else {
+      console.error('Failed to fetch products:', response.statusText)
+    }
+  } catch (error) {
+    console.error('Error fetching products:', error)
+  }
+  console.log('Products fetched:', products.value)
+}
+
+fetchProducts()
+
+
+async function addProduct() {
+  const response = await fetch('http://localhost:3333/produkty', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      name: 'New Product',
+      description: 'Description of the new product.',
+      price: 100,
+      priceValue: 100,
+      image: 'path/to/image.jpg',
+      category: 'Default Category',
+      badge: 'New'
+    })
+  });
+
+  if (response.ok) {
+    const newProduct = await response.json();
+    products.value.push(newProduct);
+    alert('Product added successfully!');
+  } else {
+    alert('Failed to add product.');
+  }
+}
+
+function onProductAdded(newProduct) {
+  products.value.push(newProduct);
+}
 </script>
 
 <style>
@@ -213,7 +265,6 @@ body {
   padding: 0 20px;
 }
 
-/* Navigation */
 .nav {
   background: #f3f4f6;
 }

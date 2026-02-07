@@ -1,0 +1,145 @@
+[
+    {
+        "id": 1,
+        "name": "hEX lite",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/2064_tm.webp",
+        "link": "/product/hex_lite",
+        "price": "$39.95",
+        "priceValue": 39.95,
+        "category": "Home",
+        "badge": "New",
+        "features": [
+            "5x Ethernet",
+            "Small plastic case",
+            "RouterOS L4"
+        ],
+        "description": "Compact 5 port ethernet router, ideal for small setups."
+    },
+    {
+        "id": 2,
+        "name": "hEX",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/2350_tm.webp",
+        "link": "/product/hex",
+        "price": "$59.95",
+        "priceValue": 59.95,
+        "category": "Home",
+        "badge": null,
+        "features": [
+            "5x Gigabit Ethernet",
+            "RouterOS L4"
+        ],
+        "description": "Small form factor router with gigabit ports for home and office."
+    },
+    {
+        "id": 3,
+        "name": "hEX PoE lite",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/2066_tm.webp",
+        "link": "/product/hex_poe_lite",
+        "price": "$59.95",
+        "priceValue": 59.95,
+        "category": "Home",
+        "badge": null,
+        "features": [
+            "PoE output",
+            "5x Ethernet",
+            "USB"
+        ],
+        "description": "Affordable router with PoE output for powering devices."
+    },
+    {
+        "id": 4,
+        "name": "RB5009UG+S+IN",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/2350_tm.webp",
+        "link": "/product/rb5009ugs",
+        "price": "$349.00",
+        "priceValue": 349.0,
+        "category": "Enterprise",
+        "badge": "Popular",
+        "features": [
+            "10G Ethernet",
+            "SFP+",
+            "RouterOS L7"
+        ],
+        "description": "Enterprise-grade router with multiple 10G-capable ports."
+    },
+    {
+        "id": 5,
+        "name": "RB4011iGS+RM",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/2466_lg.webp",
+        "link": "/product/rb4011",
+        "price": "$199.00",
+        "priceValue": 199.0,
+        "category": "Business",
+        "badge": null,
+        "features": [
+            "10x Gigabit",
+            "1x SFP+",
+            "64bit CPU"
+        ],
+        "description": "Powerful multi-port router for more demanding networks."
+    },
+    {
+        "id": 6,
+        "name": "RB3011UiAS-RM",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/2490_lg.webp",
+        "link": "/product/rb3011",
+        "price": "$179.00",
+        "priceValue": 179.0,
+        "category": "Business",
+        "badge": null,
+        "features": [
+            "10x Gigabit",
+            "Dual-core CPU",
+            "USB"
+        ],
+        "description": "Balanced performance router with multiple ports and features."
+    },
+    {
+        "id": 7,
+        "name": "CCR1009-7G-1C-1S+",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/883_lg.webp",
+        "link": "/product/ccr1009",
+        "price": "$649.00",
+        "priceValue": 649.0,
+        "category": "Enterprise",
+        "badge": "Pro",
+        "features": [
+            "7x Gigabit",
+            "1x Combo",
+            "1x SFP+"
+        ],
+        "description": "Carrier-class router for demanding enterprise environments."
+    },
+    {
+        "id": 8,
+        "name": "RBcAPGi-5acD2nD",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/845_lg.webp",
+        "link": "/product/rbcap",
+        "price": "$129.00",
+        "priceValue": 129.0,
+        "category": "Wireless",
+        "badge": null,
+        "features": [
+            "Outdoor",
+            "Dual-band",
+            "PoE"
+        ],
+        "description": "Robust outdoor unit with dual-band WiFi and PoE support."
+    },
+    {
+        "id": 9,
+        "name": "hEX S",
+        "image": "https://cdn.mikrotik.com/web-assets/rb_images/1282_lg.webp",
+        "link": "/product/hex_s",
+        "price": "$119.00",
+        "priceValue": 119.0,
+        "category": "Home",
+        "badge": null,
+        "features": [
+            "SFP",
+            "Gigabit ports",
+            "RouterOS"
+        ],
+        "description": "Small router with SFP port for fiber connectivity."
+    }
+]
